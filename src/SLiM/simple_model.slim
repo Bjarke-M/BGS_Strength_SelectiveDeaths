@@ -1,0 +1,67 @@
+// Keywords: residence time of a bad mutation
+
+initialize() {
+	//define constants (done by commandline)
+	//defineConstant('outfile', 'SLiM/outfile.csv');
+	//defineConstant('logfile', 'SLiM/somthing_sim.csv');
+	//defineConstant('s', -0.01);
+	//defineConstant('h', 0.5);
+	//defineConstant('n', 50000);
+	// define globas
+	defineGlobal('cum_sum', 0);
+
+	// init
+	initializeMutationRate(0);
+	initializeMutationType("m2", h, "f", -s);  // introduced mutation
+	initializeGenomicElementType("g1", m2, 1.0);
+	initializeGenomicElement(g1, 0, 1);
+	initializeRecombinationRate(1e-8);
+}
+
+///////////////////////////////start simulation //////////////////////////////
+1 early() {
+	sim.addSubpop("p1", n);
+}
+1 late() {
+	// introduce the bad mutation
+	target = sample(p1.genomes, 100);
+	target.addNewDrawnMutation(m2, 1);
+	// initiate the log
+	log = community.createLogFile(logfile, logInterval=1);
+	log.addCycle();
+	log.addCustomColumn('count','sum(p1.genomes.countOfMutationsOfType(m2));');
+}
+
+1: late() {
+	mut = sim.mutationsOfType(m2);
+	// check if mutation survived
+	if (size(mut) >= 1)
+	{	
+		// if it survived, count and update cummuluative sum
+		defineGlobal('cum_sum',cum_sum + sum(p1.genomes.countOfMutationsOfType(m2)));
+	}
+	else
+	{	
+		fixed = (sum(sim.substitutions.mutationType == m2) == 1);
+		if (fixed)
+		{
+		writeFile(outfile, 't,count,n,s,h');
+		writeFile(outfile, paste('fixed',cum_sum,n,s,h, sep=","), append=T);
+		sim.simulationFinished();
+		}
+		else 
+		{
+		// end simulation and track things
+		writeFile(outfile, 't,count,n,s,h');
+		writeFile(outfile, paste(sim.cycle-1,cum_sum,n,s,h, sep=","), append=T);
+		sim.simulationFinished();
+		}
+	}
+}
+
+100000 early() {
+	writeFile(outfile, 't,count,n,s,h');
+	writeFile(outfile, paste('seggretating',cum_sum,n,s,h, sep=","), append=T);
+	sim.simulationFinished();
+}
+
