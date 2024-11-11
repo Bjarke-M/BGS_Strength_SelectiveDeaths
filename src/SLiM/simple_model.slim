@@ -24,7 +24,7 @@ initialize() {
 }
 1 late() {
 	// introduce the bad mutation
-	target = sample(p1.genomes, 100);
+	target = sample(p1.genomes, 1);
 	target.addNewDrawnMutation(m2, 1);
 	// initiate the log
 	log = community.createLogFile(logfile, logInterval=1);
