@@ -1,0 +1,176 @@
+// Keywords: residence time of a bad mutation
+
+initialize() {
+	defineGlobal('output_file','test_file.csv');
+	defineGlobal('replicates',5);
+	defineGlobal('output_df',DataFrame());
+	defineGlobal('h',0.5);
+	defineGlobal('s',0);
+	defineGlobal('n',500);
+	defineGlobal('iterator',0);
+	// init
+	initializeMutationRate(0);
+	initializeMutationType("m2", h, "f",- s);  // introduced mutation
+	initializeGenomicElementType("g1", m2, 1.0);
+	initializeGenomicElement(g1, 0, 1);
+	initializeRecombinationRate(1e-8);
+}
+
+///////////////////////////////start simulation //////////////////////////////
+1 early() {
+	sim.addSubpop("p1", n);
+	defineConstant("simID", getSeed());
+}
+1 late() {
+	// introduce the bad mutation
+	sim.outputFull(tempdir() + "slim_" + simID + ".txt");
+	target = sample(p1.genomes, 1);
+	target.addNewDrawnMutation(m2, 1);
+	defineGlobal('cum_sum',0);
+	defineGlobal('sum_het',0);
+	defineGlobal('sum_homo',0);
+}
+1: late() {
+	mut = sim.mutationsOfType(m2);
+	// check if mutation survived
+	if (size(mut) >= 1)
+	{
+		// if it survived, count and update cummuluative sum
+		defineGlobal('cum_sum',cum_sum + sum(p1.genomes.countOfMutationsOfType(m2)));
+		// get type
+		counts = sim.subpopulations.individuals.countOfMutationsOfType(m2);
+
+		// count heterozygotes 
+		n_het = sum(counts==1);
+		defineGlobal('sum_het',sum_het + n_het);
+
+		// count homozygotes 
+		n_homo = sum(counts==2);
+		defineGlobal('sum_homo',sum_homo + n_homo);
+
+	
+	}
+	else
+	{
+		fixed = (sum(sim.substitutions.mutationType == m2) == 1);
+		if (fixed)
+		{
+			data = Dictionary('t',sim.cycle-1,'count',cum_sum,'n_het',sum_het,'n_homo', sum_homo,'n',n,'s',s,'h',h, 'fixed', 1);
+			output_df.appendKeysAndValuesFrom(data);
+			defineGlobal('iterator',iterator+1);
+			if (iterator < replicates) {
+				cat(simID + ": FIXED - RESTARTING\n");
+				
+				// go back to tick 1000
+				sim.readFromPopulationFile(tempdir() + "slim_" + simID + ".txt");
+				
+				// start a newly seeded run
+				setSeed(rdunif(1, 0, asInteger(2^62) - 1));
+				
+				// re-introduce the sweep mutation
+				target = sample(p1.genomes, 1);
+				target.addNewDrawnMutation(m2, 1);
+				defineGlobal('cum_sum', 0);
+				defineGlobal('sum_het',0);
+				defineGlobal('sum_homo',0);
+				defineGlobal('cum_sum',cum_sum + sum(p1.genomes.countOfMutationsOfType(m2)));
+				
+				// get type
+				counts = sim.subpopulations.individuals.countOfMutationsOfType(m2);
+
+				// count heterozygotes 
+				n_het = sum(counts==1);
+				defineGlobal('sum_het',sum_het + n_het);
+
+				// count homozygotes 
+				n_homo = sum(counts==2);
+				defineGlobal('sum_homo',sum_homo + n_homo);
+
+			
+			}
+			else {
+				sim.simulationFinished();
+			}
+		}
+		else
+		{
+			// end simulation and track things
+			data = Dictionary('t',sim.cycle-1,'count',cum_sum,'n_het',sum_het,'n_homo', sum_homo,'n',n,'s',s,'h',h, 'fixed', 0);
+			output_df.appendKeysAndValuesFrom(data);
+			defineGlobal('iterator',iterator+1);
+			if (iterator < replicates) {
+				cat(simID + ": LOST - RESTARTING\n");
+				
+				// go back to tick 1000
+				sim.readFromPopulationFile(tempdir() + "slim_" + simID + ".txt");
+				
+				// start a newly seeded run
+				setSeed(rdunif(1, 0, asInteger(2^62) - 1));
+				
+				// re-introduce the sweep mutation
+				target = sample(p1.genomes, 1);
+				target.addNewDrawnMutation(m2, 1);
+				defineGlobal('cum_sum', 0);
+					defineGlobal('sum_het',0);
+	defineGlobal('sum_homo',0);
+				defineGlobal('cum_sum',cum_sum + sum(p1.genomes.countOfMutationsOfType(m2)));
+				// get type
+				counts = sim.subpopulations.individuals.countOfMutationsOfType(m2);
+
+
+				// count heterozygotes 
+				n_het = sum(counts==1);
+				defineGlobal('sum_het',sum_het + n_het);
+
+				// count homozygotes 
+				n_homo = sum(counts==2);
+				defineGlobal('sum_homo',sum_homo + n_homo);
+			
+			}
+			else {
+				sim.simulationFinished();
+				
+				df = output_df;
+				csv_data = df.serialize("csv");
+				writeFile(output_file, csv_data);
+			}
+		}
+	}
+}
+
+100000 early() {
+	data = Dictionary('t',sim.cycle-1,'count',cum_sum,'n_het',sum_het,'n_homo', sum_homo,'n',n,'s',s,'h',h, 'fixed', 2);
+	output_df.appendKeysAndValuesFrom(data);
+	defineGlobal('iterator',iterator+1);
+	
+	
+	if (iterator < replicates) {
+		cat(simID + ": seggretating - RESTARTING\n");
+		
+		// go back to tick 1000
+		sim.readFromPopulationFile(tempdir() + "slim_" + simID + ".txt");
+		
+		// start a newly seeded run
+		setSeed(rdunif(1, 0, asInteger(2^62) - 1));
+		
+		// re-introduce the sweep mutation
+		target = sample(p1.genomes, 1);
+		target.addNewDrawnMutation(m2, 1);
+		defineGlobal('cum_sum', 0);
+		// get type
+		counts = sim.subpopulations.individuals.countOfMutationsOfType(m2);
+
+		// count heterozygotes 
+		n_het = sum(counts==1);
+		defineGlobal('sum_het',sum_het + n_het);
+
+		// count homozygotes 
+		n_homo = sum(counts==2);
+		defineGlobal('sum_homo',sum_homo + n_homo);
+
+	}
+	else {
+		sim.simulationFinished();
+	}
+}
+
