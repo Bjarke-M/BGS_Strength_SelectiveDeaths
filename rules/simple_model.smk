@@ -1,6 +1,6 @@
 rule selective_deaths:
     output:
-        outfile = 'results/selected_deaths/{n}/{ns}/{h}/replicate.{replicate}.csv',
+        outfile = temp('results/selected_deaths/{n}/{ns}/{h}/replicate.{replicate}.csv'),
     params:
         ns = lambda wildcards: wildcards.ns,
         h = lambda wildcards: wildcards.h,

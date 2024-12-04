@@ -14,7 +14,7 @@ include: 'rules/simple_model.smk'
 #snakemake --executor slurm -j 10 --sdm conda --default-resources slurm_account=primatediversity
 rule all:
     input:
-        expand('results/selected_deaths/{n}/{ns}/{h}/replicate.{replicate}.csv',n=n ,ns=ns, h=h, replicate=replicate),
-        expand('results/selected_deaths/summaries/popsize_{n}_ns_{ns}_dominance_{h}.csv',n=n, ns=ns, h=h),
+        #expand('results/selected_deaths/{n}/{ns}/{h}/replicate.{replicate}.csv',n=n ,ns=ns, h=h, replicate=replicate),
+        #expand('results/selected_deaths/summaries/popsize_{n}_ns_{ns}_dominance_{h}.csv',n=n, ns=ns, h=h),
         'results/selected_deaths/summaries/mean_results.csv'
 
