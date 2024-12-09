@@ -14,7 +14,7 @@ rule selective_deaths:
         '../envs/slim.yaml'
     shell:
         '''
-        slim -d n={params.n} -d h={params.h} -d s={params.s} -d replicates={params.replicates_per_job} -d "output_file='{output.outfile}'" src/SLiM/replicating_simple_model.slim
+        slim -d n={params.n} -d h={params.h} -d s={params.s} -d replicates={params.replicates_per_job} -d "output_file='{output.outfile}'" src/SLiM/replicating_stratified_simple_model.slim
         '''    
 
 

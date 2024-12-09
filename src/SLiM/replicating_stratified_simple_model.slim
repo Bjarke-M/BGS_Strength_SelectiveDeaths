@@ -1,16 +1,16 @@
 // Keywords: residence time of a bad mutation
 
 initialize() {
-	defineGlobal('output_file','test_file.csv');
-	defineGlobal('replicates',5);
+	//defineGlobal('output_file','test_file.csv');
+	//defineGlobal('replicates',5);
 	defineGlobal('output_df',DataFrame());
-	defineGlobal('h',0.5);
-	defineGlobal('s',0);
-	defineGlobal('n',500);
+	//defineGlobal('h',0.5);
+	//defineGlobal('s',0);
+	//defineGlobal('n',500);
 	defineGlobal('iterator',0);
 	// init
 	initializeMutationRate(0);
-	initializeMutationType("m2", h, "f",- s);  // introduced mutation
+	initializeMutationType("m2", h, "f",-s);  // introduced mutation
 	initializeGenomicElementType("g1", m2, 1.0);
 	initializeGenomicElement(g1, 0, 1);
 	initializeRecombinationRate(1e-8);

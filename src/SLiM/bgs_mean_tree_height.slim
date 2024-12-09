@@ -1,0 +1,46 @@
+// Keywords: tree-sequence recording, tree sequence recording
+
+initialize() {
+	
+	// define paths
+	defineConstant('path','');
+	// chromosome and popsize
+	defineConstant("N", 1000);  // pop size
+	defineConstant("L", 1e6);    // total chromosome length
+	// define Selection Coefficient
+	defineConstant("S",100/N);
+	
+	initializeTreeSeq();
+	initializeMutationRate(0);
+	initializeRecombinationRate(1e-8);
+	initializeMutationType("m2", 0.5, "f", -S);
+	initializeGenomicElementType("g2", m2, 1);
+	initializeGenomicElement(g2, 0, 1e6);
+}
+1 early() {
+	sim.addSubpop("p1", N);
+}
+
+1 late() {
+	target = sample(p1.genomes,1);
+	target.addNewDrawnMutation(m2, asInteger(L/2));
+}
+
+1: late() {
+	mut = sim.mutationsOfType(m2);
+	if (size(mut) < 1){
+		target = sample(p1.genomes,1);
+		target.addNewDrawnMutation(m2, asInteger(L/2));
+	}
+}
+2:(10*N) late() {
+	if (sim.cycle%N==0){
+	out_put = path+'t_'+asInteger(sim.cycle/N)+'N' + '.trees';
+	print(out_put);
+	sim.treeSeqOutput(out_put);
+	}
+	}
+
+10*N late() {
+    sim.simulationFinished();
+}
